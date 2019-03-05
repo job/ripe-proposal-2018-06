@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2018 Job Snijders <job@ntt.net>
+# Copyright (C) 2018-2019 Job Snijders <job@ntt.net>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -23,8 +23,8 @@
 # ARISING IN ANY WAY OUT OF  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import ripe-proposal-2018-06
-version = ripe-proposal-2018-06.__version__
+import ripe_proposal_2018_06
+version = ripe_proposal_2018_06.__version__
 
 import codecs
 import os
@@ -34,6 +34,7 @@ from os.path import abspath, dirname, join
 from setuptools import setup, find_packages
 
 here = abspath(dirname(__file__))
+
 
 def parse_requirements(filename):
     """ load requirements from a pip requirements file """
@@ -54,7 +55,7 @@ install_reqs = parse_requirements('requirements.txt')
 reqs = install_reqs
 
 setup(
-    name='ripe-proposal-2018-06',
+    name='ripe_proposal_2018_06',
     version=version,
     maintainer="Job Snijders",
     maintainer_email='job@ntt.net',
@@ -73,5 +74,5 @@ setup(
         'Programming Language :: Python :: 3 :: Only'
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
-    entry_points={'console_scripts': ['ripe-proposal-2018-06 = ripe-proposal-2018-06.ripe-proposal-2018-06:main']},
+    entry_points={'console_scripts': ['ripe_proposal_2018-06 = ripe_proposal_2018_06.ripe_proposal_2018_06:main']},
 )

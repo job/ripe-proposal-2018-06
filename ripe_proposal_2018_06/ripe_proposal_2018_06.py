@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-# rtrsub - A RTR Substitution
+# RIPE Policy Proposal 2018-06 Analyser
 #
-# Copyright (C) 2016-2018 Job Snijders <job@instituut.net>
-#
-# This file is part of rtrsub
+# Copyright (C) 2018-2019 Job Snijders <job@ntt.net>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -32,13 +30,12 @@ from ipaddress import ip_network
 from operator import itemgetter
 
 import argparse
-import jinja2
 import json
 import os
 import pprint
 import radix
 import requests
-import rtrsub
+import ripe_proposal_2018_06
 import sys
 
 
@@ -52,22 +49,18 @@ def main():
                         help="""Location of the RPKI Cache in JSON format
 (default: https://rpki.gin.ntt.net/api/export.json)""")
 
-    parser.add_argument('--afi', dest='afi', type=str, required=True,
-                        help="[ ipv4 | ipv6 | mixed ]")
+    parser.add_argument('--afi', dest='afi', type=str, required=False,
+                        default='mixed', help="""[ ipv4 | ipv6 | mixed ]
+(default: mixed""")
 
-    parser.add_argument('-t', dest='template', type=str,
-                        default="-", help='Template file (default: STDIN)')
+    parser.add_argument('-a', dest='asns', type=str, required=False
+                        default=None, help='[ ASNs ] comma separated')
 
-    parser.add_argument('-o', dest='output', type=str,
-                        default='-',
-                        help='Output file (default: STDOUT)')
-
-    parser.add_argument('--asns', dest='asns', type=str,
-                        help="""Limit output to the comma separated specified
-ASNs and related ROAs""")
+    parser.add_argument('-p', dest='prefix', type=str, default=None,
+                        help='Prefix')
 
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s ' + rtrsub.__version__)
+                        tversion='%(prog)s ' + ripe_proposal_2018_06.__version__)
 
     args = parser.parse_args()
 

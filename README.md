@@ -7,12 +7,12 @@ RIPE Policy Proposal 2018-06.
 Installation
 ------------
 
-`pip3 install ripe-policy-2018-06`
+`pip3 install ripe-proposal-2018-06`
 
 Use
 ---
 
-`ripe-policy-2018-06`
+`$ ripe-proposal-2018-06`
 
 Copyright
 ---------
