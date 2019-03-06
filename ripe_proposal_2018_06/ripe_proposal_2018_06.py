@@ -136,7 +136,7 @@ def main():
         res = validation_state(tree, *route)
 
         if res['state'] == "invalid" and args.state in ["invalid", "all"]:
-            print("INVALID! The %s%s RIPE-NONAUTH route object has conflicts:"
+            print("INVALID! The %sAS%s RIPE-NONAUTH route object has conflicts:"
                   % route)
             print("")
             for line in irr[route]:
