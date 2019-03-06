@@ -79,6 +79,7 @@ def main():
         sys.exit(2)
 
     if 'http' in args.cache:
+        print("Downloading %s" % args.cache, file=sys.stderr)
         r = requests.get(args.cache, headers={'Accept': 'text/json'})
         validator_export = r.json()
     else:
@@ -92,6 +93,7 @@ def main():
         irr_url = args.irr
 
     if 'http' in irr_url:
+        print("Downloading %s" % irr_url, file=sys.stderr)
         r = requests.get(irr_url).content
     else:
         r = open(irr_url, "rb").read()
