@@ -98,7 +98,7 @@ def main():
     else:
         r = open(irr_url, "rb").read()
 
-    if args.irr[-3:] == ".gz":
+    if irr_url[-3:] == ".gz":
         irr_data = zlib.decompress(r, 16 + zlib.MAX_WBITS)
     else:
         irr_data = r
