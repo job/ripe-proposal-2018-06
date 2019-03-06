@@ -51,14 +51,11 @@ def main():
                         help="""Location of the RPKI Cache in JSON format
 (default: https://rpki.gin.ntt.net/api/export.json)""")
 
-    parser.add_argument('-i', dest='irr',
-                        default="default",
-                        type=str,
+    parser.add_argument('-i', dest='irr', default="default", type=str,
                         help="""Location of the IRR database
 (default: https://ftp.ripe.net/ripe/dbase/split/ripe-nonauth.db.route.gz)""")
 
     parser.add_argument('--afi', dest='afi', type=str, required=False,
-
                         default='ipv4', help="""[ ipv4 | ipv6 ]
 (default: ipv4""")
 
