@@ -52,7 +52,7 @@ def main():
 (default: https://rpki.gin.ntt.net/api/export.json)""")
 
     parser.add_argument('-i', dest='irr',
-                        default="https://ftp.ripe.net/ripe/dbase/split/ripe-nonauth.db.route.gz",
+                        default="default",
                         type=str,
                         help="""Location of the IRR database
 (default: https://ftp.ripe.net/ripe/dbase/split/ripe-nonauth.db.route.gz)""")
@@ -92,8 +92,15 @@ def main():
     else:
         validator_export = json.load(open(args.cache, "r"))
 
-    if 'http' in args.irr:
-        r = requests.get(args.irr).content
+    if args.afi == "ipv4" and args.irr == "default":
+        irr_url = "https://ftp.ripe.net/ripe/dbase/split/ripe-nonauth.db.route.gz"
+    elif args.afi == "ipv4" and args.irr == "default":
+        irr_url = "https://ftp.ripe.net/ripe/dbase/split/ripe-nonauth.db.route6.gz"
+    else:
+        irr_url = args.irr
+
+    if 'http' in irr_url:
+        r = requests.get(irr_url).content
     else:
         r = open(args.irr, "rb").read()
 
