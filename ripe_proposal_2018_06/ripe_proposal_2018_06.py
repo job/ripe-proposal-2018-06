@@ -27,6 +27,7 @@
 
 from collections import OrderedDict
 from ipaddress import ip_network
+from pprint import pformat
 from operator import itemgetter
 from .rpkitools import validation_state
 
@@ -34,7 +35,6 @@ import argparse
 import zlib
 import json
 import os
-import pprint
 import radix
 import requests
 import ripe_proposal_2018_06
@@ -62,11 +62,11 @@ def main():
                         default='mixed', help="""[ ipv4 | ipv6 | mixed ]
 (default: mixed""")
 
-    parser.add_argument('-a', dest='asns', type=str, required=False,
-                        default=None, help='[ ASNs ] comma separated')
+    parser.add_argument('-a', dest='asn', type=int, required=False,
+                        default=None, help='Limit searching to this ROA Origin ASN')
 
     parser.add_argument('-p', dest='prefix', type=str, default=None,
-                        help='Prefix')
+                        help='Search for specific prefix (and all its more-specifics)')
 
     parser.add_argument('-s', dest='state', type=str, default="invalid",
                         help="""RPKI Origin Validation State [ valid | invalid | unknown | all ]
@@ -76,11 +76,6 @@ def main():
                         version='%(prog)s ' + ripe_proposal_2018_06.__version__)
 
     args = parser.parse_args()
-
-    if args.asns:
-        asns = list(map(int, args.asns.split(',')))
-    else:
-        asns = None
 
     if args.afi not in ["ipv4", "ipv6", "mixed"]:
         print("ERROR: afi must be 'ipv4', 'ipv6' or 'mixed'")
@@ -109,38 +104,66 @@ def main():
     else:
         irr_data = r
 
+    irr = {}
     irr_raw = []
+    irr_object = []
+    irr_objects = []
     for line in irr_data.splitlines():
-        line = line.decode('ascii')
-        if line.startswith("route:") or line.startswith("route6:"):
-            irr_raw.append(line.split()[1])
-        if line.startswith("origin:"):
-            irr_raw.append(int(line.split()[1][2:]))
-    irr = [(irr_raw[i], irr_raw[i+1]) for i in range(0, len(irr_raw), 2)]
+        if not line:
+            irr_objects.append(irr_object)
+            irr_object = []
+        else:
+            line = line.decode('ascii')
+            if not line.startswith('remarks:'):
+                irr_object.append(line)
 
-    tree = create_vrp_index(args.afi, validator_export, asns)
+    for irr_object in irr_objects:
+        prefix, origin = (None, None)
+        for line in irr_object:
+            if line.startswith("route:") or line.startswith("route6:"):
+                prefix = line.split()[1]
+            if line.startswith("origin:"):
+                origin = int(line.split()[1][2:])
+        if prefix and origin:
+            if args.prefix:
+                if ip_network(args.prefix).overlaps(ip_network(prefix)):
+                    irr[(prefix, origin)] = irr_object
+            else:
+                irr[(prefix, origin)] = irr_object
 
-    for route in irr:
+    tree = create_vrp_index(args.afi, validator_export, args.asn)
+
+    for route in irr.keys():
         res = validation_state(tree, *route)
 
         if res['state'] == "invalid" and args.state in ["invalid", "all"]:
-            print("INVALID! RIPE-NONAUTH route object \"%s AS%s\" conflicts \
-with these ROAs:" % route)
+            print("INVALID! The %s%s RIPE-NONAUTH route object has conflicts:"
+                  % route)
+            print("")
+            for line in irr[route]:
+                print("    {}".format(line))
+            print("")
+
+            if len(res['roas']) == 1:
+                print("    Above non-authoritative IRR object is in conflict with this ROA:")
+            else:
+                print("    Above non-authoritative IRR object is in conflict with these ROAs:")
             for roa in res['roas']:
-                print("    ROA: %s, MaxLength: %s, Origin AS%s (%s)"
+                print("        ROA: %s, MaxLength: %s, Origin AS%s (%s)"
                       % (roa['roa'], roa['maxlen'], roa['origin'], roa['ta']))
+            print("")
 
         if res['state'] == "valid" and args.state in ["valid", "all"]:
-            print("OK: RIPE-NONAUTH route object \"%s AS%s\" matches ROA %s \
-MaxLength %s Origin AS%s (%s)" % (*route, roa['roa'], roa['maxlen'],
-                                  roa['origin'], roa['ta']))
+            print("OK: RIPE-NONAUTH route object \"%sAS%s\" matches ROA %s, \
+MaxLength %s, Origin AS%s (%s)" % (*route, res['roa']['roa'], res['roa']['maxlen'],
+                                  res['roa']['origin'], res['roa']['ta']))
 
         if args.state in ["unknown", "all"]:
-            print("UNKNOWN: RIPE-NONAUTH route object \"%s AS%s\" is not \
+            print("UNKNOWN: RIPE-NONAUTH route object \"%sAS%s\" is not \
 covered by any ROAs" % route)
 
 
-def create_vrp_index(afi, export, asns):
+def create_vrp_index(afi, export, search_asn):
     """
     :param afi:     which address family to filter for
     :param export:  the JSON blob with all ROAs
@@ -168,7 +191,7 @@ def create_vrp_index(afi, export, asns):
                 raise ValueError
         except ValueError:
             print("ERROR: ASN malformed", file=sys.stderr)
-            print(pprint.pformat(roa, indent=4), file=sys.stderr)
+            print(pformat(roa, indent=4), file=sys.stderr)
             continue
 
         prefix = str(prefix_obj)
@@ -176,14 +199,14 @@ def create_vrp_index(afi, export, asns):
         maxlength = int(roa['maxLength'])
         ta = roa['ta']
 
-        if asns:
-            if asn in asns:
+        if search_asn:
+            if asn == search_asn:
                 roa_list.append((prefix, prefixlen, maxlength, asn, ta))
         else:
             roa_list.append((prefix, prefixlen, maxlength, asn, ta))
 
     for roa in set(roa_list):
-        if not asns or int(roa[3]) in asns:
+        if not search_asn or int(roa[3]) == search_asn:
             rnode = tree.search_exact(roa[0])
             if not rnode:
                 rnode = tree.add(roa[0])

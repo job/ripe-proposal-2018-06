@@ -74,5 +74,5 @@ setup(
         'Programming Language :: Python :: 3 :: Only'
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
-    entry_points={'console_scripts': ['ripe_proposal_2018-06 = ripe_proposal_2018_06.ripe_proposal_2018_06:main']},
+    entry_points={'console_scripts': ['ripe-proposal-2018-06 = ripe_proposal_2018_06.ripe_proposal_2018_06:main']},
 )
