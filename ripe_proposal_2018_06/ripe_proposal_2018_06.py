@@ -59,8 +59,8 @@ def main():
 
     parser.add_argument('--afi', dest='afi', type=str, required=False,
 
-                        default='mixed', help="""[ ipv4 | ipv6 | mixed ]
-(default: mixed""")
+                        default='ipv4', help="""[ ipv4 | ipv6 ]
+(default: ipv4""")
 
     parser.add_argument('-a', dest='asn', type=int, required=False,
                         default=None, help='Limit searching to this ROA Origin ASN')
@@ -89,7 +89,7 @@ def main():
 
     if args.afi == "ipv4" and args.irr == "default":
         irr_url = "https://ftp.ripe.net/ripe/dbase/split/ripe-nonauth.db.route.gz"
-    elif args.afi == "ipv4" and args.irr == "default":
+    elif args.afi == "ipv6" and args.irr == "default":
         irr_url = "https://ftp.ripe.net/ripe/dbase/split/ripe-nonauth.db.route6.gz"
     else:
         irr_url = args.irr
@@ -97,7 +97,7 @@ def main():
     if 'http' in irr_url:
         r = requests.get(irr_url).content
     else:
-        r = open(args.irr, "rb").read()
+        r = open(irr_url, "rb").read()
 
     if args.irr[-3:] == ".gz":
         irr_data = zlib.decompress(r, 16 + zlib.MAX_WBITS)

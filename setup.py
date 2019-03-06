@@ -55,7 +55,7 @@ install_reqs = parse_requirements('requirements.txt')
 reqs = install_reqs
 
 setup(
-    name='ripe_proposal_2018_06',
+    name='ripe-proposal-2018-06',
     version=version,
     maintainer="Job Snijders",
     maintainer_email='job@ntt.net',
