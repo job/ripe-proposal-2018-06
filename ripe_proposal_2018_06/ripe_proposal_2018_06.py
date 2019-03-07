@@ -132,7 +132,7 @@ def main():
 
     tree = create_vrp_index(args.afi, validator_export, args.asn)
 
-    for route in irr.keys():
+    for route in sorted(irr.keys(), key=lambda x: int(x[1])):
         res = validation_state(tree, *route)
 
         if res['state'] == "invalid" and args.state in ["invalid", "all"]:
