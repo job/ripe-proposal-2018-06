@@ -36,7 +36,7 @@ def validation_state(tree, prefix, origin):
     """
 
     if not tree.search_best(prefix):
-        return {"state": "unknown"}
+        return {"state": "not-found"}
 
     p = ip_network(prefix)
     s = tree.search_worst(prefix).prefix

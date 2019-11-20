@@ -66,7 +66,7 @@ def main():
                         help='Search for specific prefix (and all its more-specifics)')
 
     parser.add_argument('-s', dest='state', type=str, default="invalid",
-                        help="""RPKI Origin Validation State [ valid | invalid | unknown | all ]
+                        help="""RPKI Origin Validation State [ valid | invalid | not-found | all ]
 (default: invalid)""")
 
     parser.add_argument('-v', '--version', action='version',
@@ -157,7 +157,7 @@ def main():
 MaxLength %s, Origin AS%s (%s)" % (*route, res['roa']['roa'], res['roa']['maxlen'],
                                   res['roa']['origin'], res['roa']['ta']))
 
-        if args.state in ["unknown", "all"]:
+        if args.state in ["not-found", "all"]:
             print("UNKNOWN: RIPE-NONAUTH route object \"%sAS%s\" is not \
 covered by any ROAs" % route)
 
